@@ -23,7 +23,7 @@ let L = [
 ];
 
 // Threshold list
-let T = [[4, 4]];
+let T = [];
 
 // Synapse list
 let syn = [
@@ -118,6 +118,7 @@ function generateSM(C) {
   let n = possible.n; // Number of functions
   let active = possible.active;
   let q = computeCombination(n); // Number of spiking vectors
+
   // Initialize matrix spiking matrix with size of combination x n
   let S = [];
   for (let i = 0; i < q; i++) {
@@ -129,7 +130,12 @@ function generateSM(C) {
 
   // for each neuron m find the number of possible spiking vectors
   for (let m = 0; m < L[0].length; m++) {
+
     let functions = getFunctions(m, active);
+   
+    console.log("\nNeuron ",m) 
+    console.log("n",n)
+    console.log("Functions ", functions)
 
     // For each neuron, if the number of functions is 0, then set all the values of the spiking vector to 0
     if (n[m] == 0) {
@@ -142,20 +148,38 @@ function generateSM(C) {
     }
     // If the number of functions is 1, then set all the values of the spiking vector to 1
     else {
-      let i = 0;
-      let p = q / n[m];
-      for (let j = 0; j < functions.length; j++) {
-        let k = 1;
-        while (k <= p) {
-          S[i][functions[j]] = 1;
-          k++;
-          i++;
+      i=0;
+      j=0;
+      while(i<functions.length){
+        while(j<q){
+          S[j][functions[i]] = 1;
+          console.log("S",S)
+          j++;
         }
+        i++;
       }
+      // let i = 0;
+      // let p = q / n[m];
+      // console.log("n[m]", n[m])
+      // console.log("Q", q)
+      // for (let j = 0; j < functions.length; j++) {
+      //   let k = 0;
+      //   while (k < p) {
+          
+      //     console.log("i", i)
+      //     console.log("K",k)
+      //     console.log("P",p)
+      //     S[i][functions[j]] = 1;
+      //     console.log("S",S)
+
+      //     k++;
+      //     i++;
+      //   }
+      // }
     }
-    q = q / n[m];
+    
+    // q = q / n[m];
   }
-  S[1][2] = 1;
   return S;
 }
 console.log("Configuration Matrix: ", C);

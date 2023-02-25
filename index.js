@@ -221,8 +221,9 @@ function generatePM(C) {
       console.log("INDEX", syn.indexOf([m,getNeuronFromVariable(j)]))
       let target = [m,getNeuronFromVariable(j)];
       if (syn.find(x => arrayEquals(x, target))) {
-        P[i][j] = sum
-        console.log("Sum: ", sum)
+        if (checkThreshold(C, i)){
+          P[i][j] = sum
+          console.log("Sum: ", sum)}
       }
       else{
         

@@ -6,6 +6,9 @@
 // Configuration Matrix
 let C = [[1, 1, 2]];
 
+// Variable Location
+let VL = [1,1,2];
+
 // Function Matrix
 let F = [
   [1, 1, 0],
@@ -23,13 +26,21 @@ let L = [
 ];
 
 // Threshold list
-let T = [];
+let T = [[4,4]];
 
 // Synapse list
 let syn = [
   [1, 2],
   [2, 1],
 ];
+
+
+function arrayEquals(a, b) {
+  return Array.isArray(a) && Array.isArray(b) && 
+         a.length === b.length && 
+         a.every((val, index) => val === b[index]);
+}
+
 
 // Helper Functions
 function computeCombination(n) {
@@ -41,10 +52,11 @@ function computeCombination(n) {
   }
   return combination;
 }
+
+// Computes for possible functions that can be activated
 function computePossible(C) {
-  // Initialize active matrix with size of L
-  // active is a matrix
-  // let n be a list with number of elements equal to the number of columns of F
+  // Initialize active matrix with size of Function Location matrix
+  // let n be a list with number of elements equal to the number of neurons
   let n = [];
   for (let i = 0; i < L[0].length; i++) {
     n.push(0);
@@ -75,8 +87,11 @@ function computePossible(C) {
     }
     n[j] = count;
   }
+  console.log(active);
   return { n, active };
 }
+
+// Checks for configuration C if function i has a threshold that is met
 function checkThreshold(C, i) {
   // Check if i is in Threshold functions
   for (let j = 0; j < T.length; j++) {
@@ -113,6 +128,7 @@ function getFunctions(m, active) {
 }
 
 // Algorithm 1: Spiking Matrix
+// Consists of vectors containing functions that will spike
 function generateSM(C) {
   let possible = computePossible(C);
   let n = possible.n; // Number of functions
@@ -148,39 +164,87 @@ function generateSM(C) {
     }
     // If the number of functions is 1, then set all the values of the spiking vector to 1
     else {
-      i=0;
-      j=0;
-      while(i<functions.length){
-        while(j<q){
-          S[j][functions[i]] = 1;
-          console.log("S",S)
-          j++;
-        }
-        i++;
-      }
-      // let i = 0;
-      // let p = q / n[m];
-      // console.log("n[m]", n[m])
-      // console.log("Q", q)
-      // for (let j = 0; j < functions.length; j++) {
-      //   let k = 0;
-      //   while (k < p) {
+      let i = 0;
+      let p = n[m]/q;
+      console.log("\nn[m]: ", n[m])
+      console.log("Q: ", q)
+      console.log("P: ", p)
+      console.log("\n");
+      for (let j = 0; j < functions.length; j++) {  //correct
+        let k = 0;
+        while (k < p) {
           
-      //     console.log("i", i)
-      //     console.log("K",k)
-      //     console.log("P",p)
-      //     S[i][functions[j]] = 1;
-      //     console.log("S",S)
+          console.log("i", i)
+          console.log("j", j)
+          console.log("K",k)
+          console.log("P",p)
+          S[i][functions[j]] = 1;
+          console.log("S",S)
 
-      //     k++;
-      //     i++;
-      //   }
-      // }
+          k++;
+          i++;
+        }
+      }
     }
     
-    // q = q / n[m];
+    q = n[m]/q;
   }
   return S;
+}
+
+
+// Algorithm 2: Production Matrix
+// consists of the effects of each function in changing of variable values
+function generatePM(C) {
+  let P = [];
+  for (let i = 0; i < F.length; i++) {
+    P.push([]);
+    for (let j = 0; j < F[i].length; j++) {
+      P[i].push(0);
+    }
+  }
+
+  for (let i = 0; i<F.length; i++){
+    let sum = 0;
+    for (let j =0; j<F[0].length; j++){
+      sum = sum + F[i][j]*C[0][j]
+      console.log("SUM ", sum);
+    }
+
+
+    let m = getNeuronFromFunction(i)+1
+    console.log(m)
+
+
+    for (let j=0; j<F[0].length; j++){
+      console.log("i j = ", [m, getNeuronFromVariable(j)])
+      console.log("INDEX", syn.indexOf([m,getNeuronFromVariable(j)]))
+      let target = [m,getNeuronFromVariable(j)];
+      if (syn.find(x => arrayEquals(x, target))) {
+        P[i][j] = sum
+        console.log("Sum: ", sum)
+      }
+      else{
+        
+      }
+    }
+
+
+  }
+  return P;
+}
+
+function getNeuronFromFunction(i){
+  for (let j=0; j<L[i].length;j++){
+    if (L[i][j] == 1){
+      return j
+    }
+  }
+}
+
+function getNeuronFromVariable(j){
+  return VL[j]
+
 }
 console.log("Configuration Matrix: ", C);
 console.log("Function Matrix: ", F);
@@ -188,3 +252,5 @@ console.log("Function Location Matrix: ", L);
 console.log("Threshold List: ", T);
 console.log("Synapse List: ", syn);
 console.log("Spiking Matrix: ", generateSM(C));
+
+console.log("Production Matrix: ",generatePM(C))

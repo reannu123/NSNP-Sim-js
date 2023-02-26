@@ -34,6 +34,12 @@ let syn = [
   [2, 1],
 ];
 
+// Hard-coded Spiking Matrix
+let S_debug = [
+  [1, 0, 1, 0],
+  [0, 1, 1, 0],
+];
+
 function arrayEquals(a, b) {
   return (
     Array.isArray(a) &&
@@ -273,6 +279,7 @@ function checkActiveVars(S) {
 // Generates computation graph from a given initial configuration
 function generate(C, maxDepth) {
   let unexploredStates = C;
+  let exploredStates = [];
   let graph = require("./graphType");
   let computationHistory = new graph.Graph(new graph.Node(C[0]));
 
@@ -283,19 +290,55 @@ function generate(C, maxDepth) {
     for (let i = 0; i < unexploredStates.length; i++) {
       // console.log("Unexplored State: ", unexploredStates[i]);
       let S = generateSM(unexploredStates[i]);
-      S = [
-        [1, 0, 1, 0],
-        [0, 1, 1, 0],
-      ]; // Hardcoded for testing
+      S = S_debug;
       let P = generatePM(unexploredStates[i]);
       let V = checkActiveVars(S);
-      // console.log("V: ", V);
-      // console.log("S: ", S);
-      // console.log("P: ", P);
+      let NG = multiplyMatrix(S, P);
+      let C_next = addMatrix(V, NG);
+      for (let j = 0; j < C_next.length; j++) {
+        // For each configuration in C_next, check if it is already in ExploredStates
+        // If it is not, add it to the nextstates array
+        if (!exploredStates.find((x) => arrayEquals(x, C_next[j]))) {
+          nextstates.push(C_next[j]);
+        }
+        console.log("nextstates: ", nextstates);
+        // Add unexplored states[i] to explored states
+      }
+      exploredStates.push(unexploredStates[i]);
+      // remove unexplored states[i] from unexplored states
+      unexploredStates.splice(i, 1);
     }
+    // Add nextstates to unexplored states
+    unexploredStates.push(...nextstates);
+
     depth++;
   }
-  console.log(computationHistory);
+  // console.log(computationHistory);
 }
-
+function addMatrix(A, B) {
+  console.log("A: ", A);
+  console.log("B: ", B);
+  let C = [];
+  for (let i = 0; i < A.length; i++) {
+    C.push([]);
+    for (let j = 0; j < A[i].length; j++) {
+      C[i].push(A[i][j] + B[i][j]);
+    }
+  }
+  console.log("C: ", C, "\n");
+  return C;
+}
+function multiplyMatrix(A, B) {
+  let C = [];
+  for (let i = 0; i < A.length; i++) {
+    C.push([]);
+    for (let j = 0; j < B[0].length; j++) {
+      C[i].push(0);
+      for (let k = 0; k < B.length; k++) {
+        C[i][j] = C[i][j] + A[i][k] * B[k][j];
+      }
+    }
+  }
+  return C;
+}
 generate(C, (maxDepth = 2));

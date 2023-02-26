@@ -3,42 +3,33 @@
 // g = number of neurons
 // q = number of spiking vectors
 
-// Configuration Matrix
-let C = [[1, 1, 2]];
+function addMatrix(A, B) {
+  console.log("A: ", A);
+  console.log("B: ", B);
+  let C = [];
+  for (let i = 0; i < A.length; i++) {
+    C.push([]);
+    for (let j = 0; j < A[i].length; j++) {
+      C[i].push(A[i][j] + B[i][j]);
+    }
+  }
+  console.log("C: ", C, "\n");
+  return C;
+}
 
-// Variable Location
-let VL = [1, 1, 2];
-
-// Function Matrix
-let F = [
-  [1, 1, 0],
-  [0.5, 0.5, 0],
-  [0, 0, 1],
-  [0, 0, 0.5],
-];
-
-// Function Location Matrix
-let L = [
-  [1, 0],
-  [1, 0],
-  [0, 1],
-  [0, 1],
-];
-
-// Threshold list
-let T = [[4, 4]];
-
-// Synapse list
-let syn = [
-  [1, 2],
-  [2, 1],
-];
-
-// Hard-coded Spiking Matrix
-let S_debug = [
-  [1, 0, 1, 0],
-  [0, 1, 1, 0],
-];
+function multiplyMatrix(A, B) {
+  let C = [];
+  for (let i = 0; i < A.length; i++) {
+    C.push([]);
+    for (let j = 0; j < B[0].length; j++) {
+      C[i].push(0);
+      for (let k = 0; k < B.length; k++) {
+        C[i][j] = C[i][j] + A[i][k] * B[k][j];
+      }
+    }
+  }
+  return C;
+}
 
 function arrayEquals(a, b) {
   return (
@@ -124,6 +115,7 @@ function checkThreshold(C, i) {
   }
   return true;
 }
+
 function getFunctions(m, active) {
   let functions = [];
   for (let i = 0; i < active.length; i++) {
@@ -132,6 +124,50 @@ function getFunctions(m, active) {
     }
   }
   return functions;
+}
+
+function getNeuronFromFunction(i) {
+  for (let j = 0; j < L[i].length; j++) {
+    if (L[i][j] == 1) {
+      return j;
+    }
+  }
+}
+
+function getNeuronFromVariable(j) {
+  return VL[j];
+}
+
+function checkActiveVars(S) {
+  // console.log("CHECK ACTIVE VARS: \nS: ", S, "\nF: ", F, "\n");
+  let V = [];
+  for (let i = 0; i < S.length; i++) {
+    V.push([]);
+    for (let j = 0; j < S[i].length; j++) {
+      if (S[i][j] == 1) {
+        // It means function j is active
+        // Check for every active function which variable is active
+        for (let k = 0; k < F[j].length; k++) {
+          if (F[j][k] != 0) {
+            if (V[i].length < k + 1) {
+              V[i].push(0);
+            } else {
+              V[i][k] = 0;
+            }
+          } else {
+            if (V[i].length < k + 1) {
+              V[i].push(1);
+            } else {
+              if (V[i][k] != 0) {
+                V[i][k] = 1;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return V;
 }
 
 // Algorithm 1: Spiking Matrix
@@ -231,53 +267,9 @@ function generatePM(C) {
   return P;
 }
 
-function getNeuronFromFunction(i) {
-  for (let j = 0; j < L[i].length; j++) {
-    if (L[i][j] == 1) {
-      return j;
-    }
-  }
-}
-
-function getNeuronFromVariable(j) {
-  return VL[j];
-}
-
-function checkActiveVars(S) {
-  // console.log("CHECK ACTIVE VARS: \nS: ", S, "\nF: ", F, "\n");
-  let V = [];
-  for (let i = 0; i < S.length; i++) {
-    V.push([]);
-    for (let j = 0; j < S[i].length; j++) {
-      if (S[i][j] == 1) {
-        // It means function j is active
-        // Check for every active function which variable is active
-        for (let k = 0; k < F[j].length; k++) {
-          if (F[j][k] != 0) {
-            if (V[i].length < k + 1) {
-              V[i].push(0);
-            } else {
-              V[i][k] = 0;
-            }
-          } else {
-            if (V[i].length < k + 1) {
-              V[i].push(1);
-            } else {
-              if (V[i][k] != 0) {
-                V[i][k] = 1;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  return V;
-}
-
 // Algorithm 3: Computation Graph
 // Generates computation graph from a given initial configuration
-function generate(C, maxDepth) {
+function generateConfigurations(C, maxDepth) {
   let unexploredStates = C;
   let exploredStates = [];
   let graph = require("./graphType");
@@ -314,31 +306,44 @@ function generate(C, maxDepth) {
     depth++;
   }
   // console.log(computationHistory);
+  console.log("Explored States: ", exploredStates);
 }
-function addMatrix(A, B) {
-  console.log("A: ", A);
-  console.log("B: ", B);
-  let C = [];
-  for (let i = 0; i < A.length; i++) {
-    C.push([]);
-    for (let j = 0; j < A[i].length; j++) {
-      C[i].push(A[i][j] + B[i][j]);
-    }
-  }
-  console.log("C: ", C, "\n");
-  return C;
-}
-function multiplyMatrix(A, B) {
-  let C = [];
-  for (let i = 0; i < A.length; i++) {
-    C.push([]);
-    for (let j = 0; j < B[0].length; j++) {
-      C[i].push(0);
-      for (let k = 0; k < B.length; k++) {
-        C[i][j] = C[i][j] + A[i][k] * B[k][j];
-      }
-    }
-  }
-  return C;
-}
-generate(C, (maxDepth = 2));
+
+// Configuration Matrix
+let C = [[1, 1, 2]];
+
+// Variable Location
+let VL = [1, 1, 2];
+
+// Function Matrix
+let F = [
+  [1, 1, 0],
+  [0.5, 0.5, 0],
+  [0, 0, 1],
+  [0, 0, 0.5],
+];
+
+// Function Location Matrix
+let L = [
+  [1, 0],
+  [1, 0],
+  [0, 1],
+  [0, 1],
+];
+
+// Threshold list
+let T = [[4, 4]];
+
+// Synapse list
+let syn = [
+  [1, 2],
+  [2, 1],
+];
+
+// Hard-coded Spiking Matrix
+let S_debug = [
+  [1, 0, 1, 0],
+  [0, 1, 1, 0],
+];
+
+generateConfigurations(C, (maxDepth = 2));

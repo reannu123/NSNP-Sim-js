@@ -208,7 +208,6 @@ function generatePM(C) {
     let sum = 0;
     for (let j =0; j<F[0].length; j++){
       sum = sum + F[i][j]*C[0][j]
-      console.log("SUM ", sum);
     }
 
 
@@ -217,13 +216,11 @@ function generatePM(C) {
 
 
     for (let j=0; j<F[0].length; j++){
-      console.log("i j = ", [m, getNeuronFromVariable(j)])
-      console.log("INDEX", syn.indexOf([m,getNeuronFromVariable(j)]))
       let target = [m,getNeuronFromVariable(j)];
       if (syn.find(x => arrayEquals(x, target))) {
         if (checkThreshold(C, i)){
-          P[i][j] = sum
-          console.log("Sum: ", sum)}
+          P[i][j] = sum;
+        }
       }
       else{
         
@@ -247,6 +244,13 @@ function getNeuronFromVariable(j){
   return VL[j]
 
 }
+
+// Algorithm 3: Computation Graph 
+// Generates computation graph from a given initial configuration
+function generate(C, maxDepth){
+  let ExploredStates = new Node.Node("Hello");
+  console.log(ExploredStates)
+}
 console.log("Configuration Matrix: ", C);
 console.log("Function Matrix: ", F);
 console.log("Function Location Matrix: ", L);
@@ -255,3 +259,8 @@ console.log("Synapse List: ", syn);
 console.log("Spiking Matrix: ", generateSM(C));
 
 console.log("Production Matrix: ",generatePM(C))
+
+
+let Node = require("../NSNP-Sim-js/nodegraph")
+
+generate()

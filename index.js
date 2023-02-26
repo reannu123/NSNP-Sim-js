@@ -4,8 +4,6 @@
 // q = number of spiking vectors
 
 function addMatrix(A, B) {
-  console.log("A: ", A);
-  console.log("B: ", B);
   let C = [];
   for (let i = 0; i < A.length; i++) {
     C.push([]);
@@ -13,7 +11,6 @@ function addMatrix(A, B) {
       C[i].push(A[i][j] + B[i][j]);
     }
   }
-  console.log("C: ", C, "\n");
   return C;
 }
 
@@ -273,13 +270,22 @@ function generateConfigurations(C, maxDepth) {
   let unexploredStates = C;
   let exploredStates = [];
   let graph = require("./graphType");
-  let computationHistory = new graph.Graph(new graph.Node(C[0]));
+  // let currentNode = new graph.Node(C[0]);
+  // let rootNode = currentNode;
+  // let computationHistory = new graph.Graph(currentNode);
 
   let depth = 0;
-
+  let currentDepth = 0;
   while (depth < maxDepth) {
     let nextstates = [];
     for (let i = 0; i < unexploredStates.length; i++) {
+      // if (currentDepth != depth) {
+      //   newNode = new graph.Node(unexploredStates[i]);
+      //   currentNode.addChild(newNode);
+      //   currentNode = newNode;
+      //   currentDepth = depth;
+      // }
+
       // console.log("Unexplored State: ", unexploredStates[i]);
       let S = generateSM(unexploredStates[i]);
       S = S_debug;
@@ -287,26 +293,31 @@ function generateConfigurations(C, maxDepth) {
       let V = checkActiveVars(S);
       let NG = multiplyMatrix(S, P);
       let C_next = addMatrix(V, NG);
+
       for (let j = 0; j < C_next.length; j++) {
         // For each configuration in C_next, check if it is already in ExploredStates
         // If it is not, add it to the nextstates array
         if (!exploredStates.find((x) => arrayEquals(x, C_next[j]))) {
           nextstates.push(C_next[j]);
+          // currentNode.addChild(new graph.Node(C_next[j]));
         }
-        console.log("nextstates: ", nextstates);
-        // Add unexplored states[i] to explored states
       }
+
+      // Add unexplored states[i] to explored states
       exploredStates.push(unexploredStates[i]);
-      // remove unexplored states[i] from unexplored states
-      unexploredStates.splice(i, 1);
+
+      // graph.printAncestry(currentNode);
     }
+    // clear unexplored states
+    unexploredStates = [];
     // Add nextstates to unexplored states
     unexploredStates.push(...nextstates);
-
+    // graph.printGraph(computationHistory);
     depth++;
+    console.log("Explored States: ", exploredStates);
+    console.log("Unexplored States: ", unexploredStates);
+    console.log("Depth: ", depth);
   }
-  // console.log(computationHistory);
-  console.log("Explored States: ", exploredStates);
 }
 
 // Configuration Matrix

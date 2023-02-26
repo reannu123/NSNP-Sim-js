@@ -248,7 +248,8 @@ function getNeuronFromVariable(j){
 // Algorithm 3: Computation Graph 
 // Generates computation graph from a given initial configuration
 function generate(C, maxDepth){
-  let ExploredStates = new Node.Node("Hello");
+  let graph = require("../NSNP-Sim-js/nodegraph")
+  let ExploredStates = new graph.Node("Hello");
   console.log(ExploredStates)
 }
 console.log("Configuration Matrix: ", C);
@@ -261,6 +262,6 @@ console.log("Spiking Matrix: ", generateSM(C));
 console.log("Production Matrix: ",generatePM(C))
 
 
-let Node = require("../NSNP-Sim-js/nodegraph")
+
 
 generate()

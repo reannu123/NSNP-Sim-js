@@ -7,7 +7,7 @@
 let C = [[1, 1, 2]];
 
 // Variable Location
-let VL = [1,1,2];
+let VL = [1, 1, 2];
 
 // Function Matrix
 let F = [
@@ -26,7 +26,7 @@ let L = [
 ];
 
 // Threshold list
-let T = [[4,4]];
+let T = [[4, 4]];
 
 // Synapse list
 let syn = [
@@ -34,13 +34,14 @@ let syn = [
   [2, 1],
 ];
 
-
 function arrayEquals(a, b) {
-  return Array.isArray(a) && Array.isArray(b) && 
-         a.length === b.length && 
-         a.every((val, index) => val === b[index]);
+  return (
+    Array.isArray(a) &&
+    Array.isArray(b) &&
+    a.length === b.length &&
+    a.every((val, index) => val === b[index])
+  );
 }
-
 
 // Helper Functions
 function computeCombination(n) {
@@ -87,7 +88,7 @@ function computePossible(C) {
     }
     n[j] = count;
   }
-  console.log(active);
+  // console.log(active);
   return { n, active };
 }
 
@@ -108,7 +109,7 @@ function checkThreshold(C, i) {
       }
 
       for (let k = 0; k < nonZero.length; k++) {
-        if (C[0][nonZero[k]] < T[j][1]) {
+        if (C[nonZero[k]] < T[j][1]) {
           return false;
         }
       }
@@ -146,12 +147,11 @@ function generateSM(C) {
 
   // for each neuron m find the number of possible spiking vectors
   for (let m = 0; m < L[0].length; m++) {
-
     let functions = getFunctions(m, active);
-   
-    console.log("\nNeuron ",m) 
-    console.log("n",n)
-    console.log("Functions ", functions)
+
+    // console.log("\nNeuron ", m);
+    // console.log("n", n);
+    // console.log("Functions ", functions);
 
     // For each neuron, if the number of functions is 0, then set all the values of the spiking vector to 0
     if (n[m] == 0) {
@@ -165,33 +165,32 @@ function generateSM(C) {
     // If the number of functions is 1, then set all the values of the spiking vector to 1
     else {
       let i = 0;
-      let p = n[m]/q;
-      console.log("\nn[m]: ", n[m])
-      console.log("Q: ", q)
-      console.log("P: ", p)
-      console.log("\n");
-      for (let j = 0; j < functions.length; j++) {  //correct
+      let p = n[m] / q;
+      // console.log("\nn[m]: ", n[m]);
+      // console.log("Q: ", q);
+      // console.log("P: ", p);
+      // console.log("\n");
+      for (let j = 0; j < functions.length; j++) {
+        //correct
         let k = 0;
         while (k < p) {
-          
-          console.log("i", i)
-          console.log("j", j)
-          console.log("K",k)
-          console.log("P",p)
+          // console.log("i", i);
+          // console.log("j", j);
+          // console.log("K", k);
+          // console.log("P", p);
           S[i][functions[j]] = 1;
-          console.log("S",S)
+          // console.log("S", S);
 
           k++;
           i++;
         }
       }
     }
-    
-    q = n[m]/q;
+
+    q = n[m] / q;
   }
   return S;
 }
-
 
 // Algorithm 2: Production Matrix
 // consists of the effects of each function in changing of variable values
@@ -204,64 +203,99 @@ function generatePM(C) {
     }
   }
 
-  for (let i = 0; i<F.length; i++){
+  for (let i = 0; i < F.length; i++) {
     let sum = 0;
-    for (let j =0; j<F[0].length; j++){
-      sum = sum + F[i][j]*C[0][j]
+    for (let j = 0; j < F[0].length; j++) {
+      sum = sum + F[i][j] * C[j];
     }
 
+    let m = getNeuronFromFunction(i) + 1;
+    // console.log(m);
 
-    let m = getNeuronFromFunction(i)+1
-    console.log(m)
-
-
-    for (let j=0; j<F[0].length; j++){
-      let target = [m,getNeuronFromVariable(j)];
-      if (syn.find(x => arrayEquals(x, target))) {
-        if (checkThreshold(C, i)){
+    for (let j = 0; j < F[0].length; j++) {
+      let target = [m, getNeuronFromVariable(j)];
+      if (syn.find((x) => arrayEquals(x, target))) {
+        if (checkThreshold(C, i)) {
           P[i][j] = sum;
         }
-      }
-      else{
-        
+      } else {
       }
     }
-
-
   }
   return P;
 }
 
-function getNeuronFromFunction(i){
-  for (let j=0; j<L[i].length;j++){
-    if (L[i][j] == 1){
-      return j
+function getNeuronFromFunction(i) {
+  for (let j = 0; j < L[i].length; j++) {
+    if (L[i][j] == 1) {
+      return j;
     }
   }
 }
 
-function getNeuronFromVariable(j){
-  return VL[j]
-
+function getNeuronFromVariable(j) {
+  return VL[j];
 }
 
-// Algorithm 3: Computation Graph 
+function checkActiveVars(S) {
+  // console.log("CHECK ACTIVE VARS: \nS: ", S, "\nF: ", F, "\n");
+  let V = [];
+  for (let i = 0; i < S.length; i++) {
+    V.push([]);
+    for (let j = 0; j < S[i].length; j++) {
+      if (S[i][j] == 1) {
+        // It means function j is active
+        // Check for every active function which variable is active
+        for (let k = 0; k < F[j].length; k++) {
+          if (F[j][k] != 0) {
+            if (V[i].length < k + 1) {
+              V[i].push(0);
+            } else {
+              V[i][k] = 0;
+            }
+          } else {
+            if (V[i].length < k + 1) {
+              V[i].push(1);
+            } else {
+              if (V[i][k] != 0) {
+                V[i][k] = 1;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return V;
+}
+
+// Algorithm 3: Computation Graph
 // Generates computation graph from a given initial configuration
-function generate(C, maxDepth){
-  let graph = require("../NSNP-Sim-js/nodegraph")
-  let ExploredStates = new graph.Node("Hello");
-  console.log(ExploredStates)
+function generate(C, maxDepth) {
+  let unexploredStates = C;
+  let graph = require("./graphType");
+  let computationHistory = new graph.Graph(new graph.Node(C[0]));
+
+  let depth = 0;
+
+  while (depth < maxDepth) {
+    let nextstates = [];
+    for (let i = 0; i < unexploredStates.length; i++) {
+      // console.log("Unexplored State: ", unexploredStates[i]);
+      let S = generateSM(unexploredStates[i]);
+      S = [
+        [1, 0, 1, 0],
+        [0, 1, 1, 0],
+      ]; // Hardcoded for testing
+      let P = generatePM(unexploredStates[i]);
+      let V = checkActiveVars(S);
+      // console.log("V: ", V);
+      // console.log("S: ", S);
+      // console.log("P: ", P);
+    }
+    depth++;
+  }
+  console.log(computationHistory);
 }
-console.log("Configuration Matrix: ", C);
-console.log("Function Matrix: ", F);
-console.log("Function Location Matrix: ", L);
-console.log("Threshold List: ", T);
-console.log("Synapse List: ", syn);
-console.log("Spiking Matrix: ", generateSM(C));
 
-console.log("Production Matrix: ",generatePM(C))
-
-
-
-
-generate()
+generate(C, (maxDepth = 2));

@@ -46,8 +46,6 @@ function computePossible(C, L, T, F) {
     }
     n[j] = count;
   }
-  console.log("N: ", n);
-  console.log("Active: ", active);
   return { n, active };
 }
 
@@ -61,17 +59,50 @@ function getFunctions(m, active) {
   return functions;
 }
 
+function selectOne(possible) {
+  let n = possible.n;
+  let active = possible.active;
+  let guided = false;
+  for (let i = 0; i < n.length; i++) {
+    if (n[i] > 1) {
+      console.log("Neuron ", i + 1, " has ", n[i], " active functions");
+      let getActiveFunctions = () => {
+        let f = [];
+        for (let j = 0; j < active.length; j++) {
+          if (active[j][i] == 1) {
+            f.push(j);
+          }
+        }
+        return f;
+      };
+      let activeFunctions = getActiveFunctions();
+      console.log("Functions: ", activeFunctions);
+      if (!guided) {
+        // Randomize which function will be selected
+        let random = Math.floor(Math.random() * activeFunctions.length);
+        let selected = activeFunctions[random];
+        console.log("Selected Function: ", selected);
+        for (let j = 0; j < active.length; j++) {
+          if (activeFunctions.includes(j) && j != selected) {
+            active[j][i] = 0;
+            n[i] -= 1;
+          }
+        }
+      }
+    }
+  }
+  return { n, active };
+}
+
 function generateSM(C, L, F, T) {
   let possible = computePossible(C, L, T, F);
-  let n = possible.n; // Number of functions
-  let active = possible.active;
+  let selected = selectOne(possible);
+
+  let n = selected.n; // Number of functions
+  let active = selected.active;
   let q = computeCombination(n, L, T); // Number of spiking vectors
 
-  console.log("n: ", n);
-  console.log("active: ", active);
-  console.log("q: ", q);
-
-  // askUser();
+  console.log("Final selected: ", active);
   // Initialize matrix spiking matrix with size of combination x n
   let S = [];
   for (let i = 0; i < q; i++) {
@@ -84,10 +115,6 @@ function generateSM(C, L, F, T) {
   // for each neuron m find the number of possible spiking vectors
   for (let m = 0; m < L[0].length; m++) {
     let functions = getFunctions(m, active);
-
-    // console.log("\nNeuron ", m);
-    // console.log("n", n);
-    // console.log("Functions ", functions);
 
     // For each neuron, if the number of functions is 0, then set all the values of the spiking vector to 0
     if (n[m] == 0) {
@@ -102,20 +129,11 @@ function generateSM(C, L, F, T) {
     else {
       let i = 0;
       let p = n[m] / q;
-      // console.log("\nn[m]: ", n[m]);
-      // console.log("Q: ", q);
-      // console.log("P: ", p);
-      // console.log("\n");
       for (let j = 0; j < functions.length; j++) {
         //correct
         let k = 0;
         while (k < p) {
-          // console.log("i", i);
-          // console.log("j", j);
-          // console.log("K", k);
-          // console.log("P", p);
           S[i][functions[j]] = 1;
-          // console.log("S", S);
 
           k++;
           i++;

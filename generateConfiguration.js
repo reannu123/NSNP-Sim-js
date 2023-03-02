@@ -84,7 +84,7 @@ function generateConfigurations(C, maxDepth, L, F, T, VL, syn) {
       // }
 
       // console.log("Unexplored State: ", unexploredStates[i]);
-      let S = require("./generateSM").generateSM(unexploredStates[i], L, F, T);
+      let S = require("./generateSV").generateSM(unexploredStates[i], L, F, T);
       S = S_debug;
       let P = require("./generatePM").generatePM(
         unexploredStates[i],

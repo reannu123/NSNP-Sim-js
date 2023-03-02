@@ -34,14 +34,15 @@ let syn = [
   [2, 1],
 ];
 
-let generateSM = require("../NSNP-Sim-js/generateSM").generateSM;
+let generateSM = require("../NSNP-Sim-js/generateSV").generateSM;
 let generatePM = require("../NSNP-Sim-js/generatePM").generatePM;
 let generateConfigurations =
   require("../NSNP-Sim-js/generateConfiguration").generateConfigurations;
-console.log("Spiking Matrix: ", generateSM(C[0], L, F, T));
-console.log("Production Matrix: ", generatePM(C[0], F, L, VL, syn, T));
-console.log(
-  "State Configurations: ",
-  generateConfigurations(C, 2, L, F, T, VL, syn)
-);
+generateSM(C[0], L, F, T);
+// console.log("Spiking Matrix: ", );
+// console.log("Production Matrix: ", generatePM(C[0], F, L, VL, syn, T));
+// console.log(
+//   "State Configurations: ",
+//   generateConfigurations(C, 2, L, F, T, VL, syn)
+// );
 // generateConfigurations(C, (maxDepth = 2));
